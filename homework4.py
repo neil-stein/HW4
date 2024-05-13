@@ -136,8 +136,12 @@ Hints for step 5:
 """
 # step 1 - creating our list of URLs
 
-for i in range (0, 53):
-    
-
+url_list = []
+for i in range(0, 53):
+    year = 1970 + i
+    url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
+    url_list.append(url)
+    print(url)
+print(url_list)
 
 
