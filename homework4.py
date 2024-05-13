@@ -134,7 +134,15 @@ Hints for step 5:
     - Use the random package
     - What kind of indexes does your data have?
 """
-# step 1 - creating our list of URLs
+
+# step 1 - using the URL to pull informations
+
+
+
+
+
+
+# step 2 - creating our list of URLs
 
 url_list = []
 for i in range(0, 53):
@@ -142,6 +150,9 @@ for i in range(0, 53):
     url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
     url_list.append(url)
     print(url)
-print(url_list)
+
+
+
+
 
 
