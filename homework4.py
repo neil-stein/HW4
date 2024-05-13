@@ -1,6 +1,6 @@
-# Your name here
-# Your CNET ID here (this is the part of your uchicago email id before the @)
-# Your github user id here
+# Neil Stein
+# neilstein
+# neil-stein
 
 """
 INSTRUCTIONS
@@ -134,3 +134,10 @@ Hints for step 5:
     - Use the random package
     - What kind of indexes does your data have?
 """
+# step 1 - creating our list of URLs
+
+for i in range (0, 53):
+    
+
+
+
