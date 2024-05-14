@@ -134,25 +134,56 @@ Hints for step 5:
     - Use the random package
     - What kind of indexes does your data have?
 """
+# set-up steps
 
-# step 1 - using the URL to pull informations
+import pandas as pd
+import pandas_datareader.data as web
+from pandas_datareader import wb
+import requests
+from bs4 import BeautifulSoup
 
 
+# step 1 - using the URL to pull information and storing in a list
 
+url = "https://en.wikipedia.org/wiki/List_of_American_films_of_1970"
+response = requests.get(url)
+soup = BeautifulSoup(response.text, "html.parser")
 
+tables = soup.find_all("table")
+print("Number of tables = ",len(tables))
+
+# with the number of tables, find the correct one to pull from
+table = tables = tables[1]
+print(table)
+
+# with the correct number, begin to structure the pulling of information
+
+movie_data = [] 
+previous_row = None
+
+for i, row in enumerate(table.find_all("tr")):
+    cells = row.find_all(['td', 'th']) 
+    cleaned_row = []
+    for cell in cells:
+        cleaned_text = cell.text.strip().replace('\n', ' ')
+        cleaned_row.append(cleaned_text)
+    
+    if len(row) == 4:
+        movie_data.append(cleaned_row)
+    elif len(row) == 3 and previous_row is not None:
+        if len(previous_row) == 4:
+            cleaned_row.append(previous_row[3])
+        movie_data.append(cleaned_row)
+
+    previous_row = cleaned_row
 
 
 # step 2 - creating our list of URLs
 
 url_list = []
-for i in range(0, 53):
+for i in range(0, 54):
     year = 1970 + i
     url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
     url_list.append(url)
     print(url)
-
-
-
-
-
 
