@@ -176,25 +176,21 @@ for i, row in enumerate(table.find_all("tr")):
         domestic_gross = cells[1].text.strip().replace('\n', ' ')
         movie_data.append([title, distributor, domestic_gross])
 
-# step 2 - creating our list of URLs
+
+# step 2 - gathering all of our data
+# creating our list of URLs
 
 url_list = []
 for i in range(0, 54):
     year = 1970 + i
     url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
     url_list.append(url)
-    print(url)
 
+# next, defining our function
 
-
-
-# approach 2.0
-
-df_70 = pd.read_html("https://en.wikipedia.org/wiki/List_of_American_films_of_1970", match= "Highest-grossing films of 1970")
-df_70.head()
-
-
-
+def movie_scrape():
+    for i in list(url_list):
+        
 
 
 
