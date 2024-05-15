@@ -137,6 +137,7 @@ Hints for step 5:
 # set-up steps
 
 import pandas as pd
+import numpy as np
 import pandas_datareader.data as web
 from pandas_datareader import wb
 import requests
@@ -153,30 +154,27 @@ tables = soup.find_all("table")
 print("Number of tables = ",len(tables))
 
 # with the number of tables, find the correct one to pull from
-table = tables = tables[1]
+table = tables[1]
 print(table)
 
 # with the correct number, begin to structure the pulling of information
 
 movie_data = [] 
-previous_row = None
 
 for i, row in enumerate(table.find_all("tr")):
-    cells = row.find_all(['td', 'th']) 
+    cells = row.find_all(['td']) 
     cleaned_row = []
-    for cell in cells:
-        cleaned_text = cell.text.strip().replace('\n', ' ')
-        cleaned_row.append(cleaned_text)
-    
-    if len(row) == 4:
-        movie_data.append(cleaned_row)
-    elif len(row) == 3 and previous_row is not None:
-        if len(previous_row) == 4:
-            cleaned_row.append(previous_row[3])
+    if len(cells) > 2:        
+        for cell in cells:
+            cleaned_text = cell.text.strip().replace('\n', ' ')
+            cleaned_row.append(cleaned_text)
         movie_data.append(cleaned_row)
 
-    previous_row = cleaned_row
-
+    elif len(cells) == 2:
+        title = cells[0].text.strip().replace('\n', ' ')
+        distributor = movie_data[-1][1]
+        domestic_gross = cells[1].text.strip().replace('\n', ' ')
+        movie_data.append([title, distributor, domestic_gross])
 
 # step 2 - creating our list of URLs
 
@@ -186,4 +184,20 @@ for i in range(0, 54):
     url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
     url_list.append(url)
     print(url)
+
+
+
+
+# approach 2.0
+
+df_70 = pd.read_html("https://en.wikipedia.org/wiki/List_of_American_films_of_1970", match= "Highest-grossing films of 1970")
+df_70.head()
+
+
+
+
+
+
+
+
 
