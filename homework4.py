@@ -188,9 +188,36 @@ for i in range(0, 54):
 
 # next, defining our function
 
-def movie_scrape():
-    for i in list(url_list):
-        
+def movie_scrape(x):
+    movie_data = []
+    for i in x:
+        movie_data.append(i[-2:])
+    return movie_data
+
+    url = i
+    response = requests.get(url)
+    soup = BeautifulSoup(response.text, "html.parser")
+
+    tables = soup.find_all("table")
+    
+    table = tables[1]    
+
+    for i, row in enumerate(table.find_all("tr")):
+        cells = row.find_all(['td']) 
+        cleaned_row = []
+        if len(cells) > 2:        
+            for cell in cells:
+                cleaned_text = cell.text.strip().replace('\n', ' ')
+                cleaned_row.append(cleaned_text)
+            movie_data.append(cleaned_row)
+
+        elif len(cells) == 2:
+            title = cells[0].text.strip().replace('\n', ' ')
+            distributor = movie_data[-1][1]
+            domestic_gross = cells[1].text.strip().replace('\n', ' ')
+            movie_data.append([title, distributor, domestic_gross])
+
+
 
 
 
