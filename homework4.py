@@ -141,6 +141,7 @@ import numpy as np
 import pandas_datareader.data as web
 from pandas_datareader import wb
 import requests
+import time
 from bs4 import BeautifulSoup
 
 
@@ -188,13 +189,8 @@ for i in range(0, 54):
 
 # next, defining our function
 
-def movie_scrape(x):
+def movie_scrape(url):
     movie_data = []
-    for i in x:
-        movie_data.append(i[-2:])
-    return movie_data
-
-    url = i
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
 
@@ -216,8 +212,16 @@ def movie_scrape(x):
             distributor = movie_data[-1][1]
             domestic_gross = cells[1].text.strip().replace('\n', ' ')
             movie_data.append([title, distributor, domestic_gross])
+    return movie_data.append(url[-2:])
 
+# step 3 -- looping over the time range
+# empty data frame for storage
 
+df_films = pd.DataFrame(columns= ["Title","Distributor","Domestic_Gross"])
+
+for url in url_list:
+    movie_data = movie_scrape(url)
+    if 
 
 
 
