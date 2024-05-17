@@ -137,15 +137,13 @@ Hints for step 5:
 # set-up steps
 
 import pandas as pd
-import numpy as np
-import pandas_datareader.data as web
-from pandas_datareader import wb
 import requests
 import time
 from bs4 import BeautifulSoup
 
-
-# step 1 - using the URL to pull information and storing in a list
+"""
+step 1 - using the URL to pull information and storing in a list
+"""
 
 url = "https://en.wikipedia.org/wiki/List_of_American_films_of_1970"
 response = requests.get(url)
@@ -165,24 +163,29 @@ movie_data = []
 for i, row in enumerate(table.find_all("tr")):
     cells = row.find_all(['td']) 
     cleaned_row = []
+    year = (url[-4:])
     if len(cells) > 2:        
         for cell in cells:
             cleaned_text = cell.text.strip().replace('\n', ' ')
             cleaned_row.append(cleaned_text)
+        cleaned_row.insert(3, year)
         movie_data.append(cleaned_row)
 
     elif len(cells) == 2:
         title = cells[0].text.strip().replace('\n', ' ')
         distributor = movie_data[-1][1]
         domestic_gross = cells[1].text.strip().replace('\n', ' ')
-        movie_data.append([title, distributor, domestic_gross])
+        year = (url[-4:])
+        movie_data.append([title, distributor, domestic_gross, year])
 
+"""
+step 2 - gathering all of our data
+"""
 
-# step 2 - gathering all of our data
 # creating our list of URLs
 
 url_list = []
-for i in range(0, 54):
+for i in range(0, 55):
     year = 1970 + i
     url = f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}"
     url_list.append(url)
@@ -193,38 +196,100 @@ def movie_scrape(url):
     movie_data = []
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-
+    year = (url[-4:])
     tables = soup.find_all("table")
+    if len(tables) > 1:
+        table = tables[1]    
     
-    table = tables[1]    
+        for i, row in enumerate(table.find_all("tr")):
+            cells = row.find_all(['td']) 
+            cleaned_row = []
+            if len(cells) > 2:        
+                for cell in cells:
+                    cleaned_text = cell.text.strip().replace('\n', ' ')
+                    cleaned_row.append(cleaned_text)
+                cleaned_row.insert(3, year)
+                movie_data.append(cleaned_row)
+    
+            elif len(cells) == 2:
+                title = cells[0].text.strip().replace('\n', ' ')
+                distributor = movie_data[-1][1]
+                domestic_gross = cells[1].text.strip().replace('\n', ' ')
+                movie_data.append([title, distributor, domestic_gross, year])
+    else:
+        return print(f"Data table not found for {year}")
+    return movie_data
 
-    for i, row in enumerate(table.find_all("tr")):
-        cells = row.find_all(['td']) 
-        cleaned_row = []
-        if len(cells) > 2:        
-            for cell in cells:
-                cleaned_text = cell.text.strip().replace('\n', ' ')
-                cleaned_row.append(cleaned_text)
-            movie_data.append(cleaned_row)
+"""
+step 3 -- looping over the time range
+"""
 
-        elif len(cells) == 2:
-            title = cells[0].text.strip().replace('\n', ' ')
-            distributor = movie_data[-1][1]
-            domestic_gross = cells[1].text.strip().replace('\n', ' ')
-            movie_data.append([title, distributor, domestic_gross])
-    return movie_data.append(url[-2:])
 
-# step 3 -- looping over the time range
 # empty data frame for storage
 
-df_films = pd.DataFrame(columns= ["Title","Distributor","Domestic_Gross"])
+df_films = pd.DataFrame(columns= ["Title","Distributor","Domestic_Gross","Year"])
 
-for url in url_list:
-    movie_data = movie_scrape(url)
-    if 
+for i in range(0, 54):
+    year = 1970 + i
+    url = (f"https://en.wikipedia.org/wiki/List_of_American_films_of_{year}")
+    film_data = movie_scrape(url)
+    if film_data:
+        df_films = pd.concat([df_films, pd.DataFrame(film_data, columns=["Title", "Distributor", "Domestic_Gross", "Year"])], ignore_index=True)
+    else:
+        print(f"Data table not found for {url}")
+    time.sleep(3)
+        
+# Quality Check 
+df_films.head()
+
+# data improvements - restoring missing rank labels
+num_rows = df_films.shape[0]
+ranks = list(range(1, 11))*(num_rows// 10 + 1)
+ranks = ranks[:num_rows]
+ranks = pd.to_numeric(ranks)
+df_films.insert(loc = 0, column= "Rank", value= ranks)
 
 
+"""
+step 4 - converting our dataframe to CSV
+"""
+# conversion to a dataframe took place in the previous step to improve the code's efficiency
+# converting at this step does not work well on my computer's processing capacity
+
+df_films.to_csv(r"/Users/neilstein/Documents/Academic/Spring 24/Python I/Homework/HW4/movies.csv")
 
 
+"""
+Step 5 - random movie selector
+"""
+#set-up steps
+import pandas as pd
+import os
+
+# re-loading in our csv from the same folder we left it in earlier
+path = os.path.join(r"/Users/neilstein/Documents/Academic/Spring 24/Python I/Homework/HW4/", "movies.csv")
+films = pd.read_csv(path)
 
 
+# picking random movies -- the prompt does ask for plural, this is written to allow for that!
+
+def random_movies(num_movies):
+    max_movies = len(films)
+    num_movies = max(1, min(num_movies, max_movies))
+    if num_movies != max_movies:
+        print(f"Notice: Only {max_movies} movies are available. Selecting {num_movies} random titles.")
+    random_movies = films.sample(num_movies)
+    return random_movies["Title"].tolist()
+
+
+try:
+  num_movies_str = input("Enter the desired number of random movies (between 1 and {}): ".format(len(films)))
+  num_movies = int(num_movies_str)
+
+  random_movie_titles = random_movies(num_movies)
+
+  print(f"\nSelected Movie Titles:")
+  for title in random_movie_titles:
+    print(title)
+except ValueError:
+  print("Invalid input. Please enter an integer.")
